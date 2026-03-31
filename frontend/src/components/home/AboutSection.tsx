@@ -1,18 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
-interface AboutSectionProps {
-  profile: {
-    imageUrl?: string;
-    bio: {
-      summary?: string;
-      historyYears: number;
-      residencyYears: number;
-    };
-  } | undefined;
-}
-
-export function AboutSection({ profile }: AboutSectionProps) {
+export function AboutSection() {
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -21,9 +10,9 @@ export function AboutSection({ profile }: AboutSectionProps) {
           <div className="relative order-2 md:order-1">
             <div className="absolute -inset-4 bg-blue-100 rounded-xl transform -rotate-2"></div>
             <div className="relative bg-slate-200 rounded-lg aspect-[4/5] overflow-hidden shadow-xl">
-              <img 
-                src="https://cdn.craft4commissioner.com/img/EricWebsitePics-5.avif" 
-                alt="Eric Craft" 
+              <img
+                src="https://cdn.craft4commissioner.com/img/EricWebsitePics-5.avif"
+                alt="Eric Craft"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -38,14 +27,13 @@ export function AboutSection({ profile }: AboutSectionProps) {
               Dedicated to <span className="text-blue-900">Service</span>,<br />
               Committed to <span className="text-red-600">Community</span>.
             </h2>
-            
+
             <div className="text-lg text-slate-600 space-y-4 leading-relaxed">
               <p>
-                {profile?.bio.summary || 
-                  `With ${profile?.bio.historyYears || 23} years of history in Barrow County and a deep commitment to public safety, Eric Craft understands the challenges and opportunities facing our community.`}
+                With 23 years of history in Barrow County and a deep commitment to public safety, Eric Craft understands the challenges and opportunities facing our community.
               </p>
               <p>
-                As a family man and dedicated resident for over {profile?.bio.residencyYears || 22} years, Eric is ready to bring integrity and faith-based values to the commission. He believes in a government that listens to its people and acts with fiscal responsibility.
+                As a family man and dedicated resident for over 22 years, Eric is ready to bring integrity and faith-based values to the commission. He believes in a government that listens to its people and acts with fiscal responsibility.
               </p>
             </div>
 

@@ -1,20 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram } from "lucide-react";
-import { useDonationGetDonationConfigQuery } from "@/_generated/donation.service";
+
+const DONATE_URL = "https://secure.winred.com/craft4commissioner/donate-today";
 
 export function Footer() {
-  const { data: donationConfig } = useDonationGetDonationConfigQuery({});
-  const donateUrl = donationConfig?.externalDonationUrl || "https://secure.winred.com/craft4commissioner/donate-today";
-
   return (
     <footer className="bg-slate-900 text-white py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
-            <img 
-              src="https://cdn.craft4commissioner.com/img/Artboard%201_1%4072x.webp" 
-              alt="Eric Craft for Barrow" 
-              className="h-16 w-auto mb-4 object-contain brightness-0 invert" 
+            <img
+              src="https://cdn.craft4commissioner.com/img/Artboard%201_1%4072x.webp"
+              alt="Eric Craft for Barrow"
+              className="h-16 w-auto mb-4 object-contain brightness-0 invert"
             />
             <p className="text-slate-400 mb-4">
               Faith. Family. Responsibility.
@@ -22,7 +20,7 @@ export function Footer() {
               Dedicated to serving Barrow County.
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-bold mb-4 text-lg">Quick Links</h4>
             <ul className="space-y-2">
@@ -30,12 +28,7 @@ export function Footer() {
               <li><Link to="/priorities" className="text-slate-400 hover:text-white">Goals & Priorities</Link></li>
               <li><Link to="/about" className="text-slate-400 hover:text-white">About Eric</Link></li>
               <li>
-                <a 
-                  href={donateUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-slate-400 hover:text-white"
-                >
+                <a href={DONATE_URL} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">
                   Donate
                 </a>
               </li>
@@ -49,18 +42,10 @@ export function Footer() {
               Phone: (678) 233-7220
             </p>
             <div className="flex space-x-4">
-              <Link 
-                to="/facebook" 
-                className="text-slate-400 hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
+              <Link to="/facebook" className="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
                 <Facebook size={24} />
               </Link>
-              <Link 
-                to="/instagram" 
-                className="text-slate-400 hover:text-white transition-colors"
-                aria-label="Instagram"
-              >
+              <Link to="/instagram" className="text-slate-400 hover:text-white transition-colors" aria-label="Instagram">
                 <Instagram size={24} />
               </Link>
             </div>

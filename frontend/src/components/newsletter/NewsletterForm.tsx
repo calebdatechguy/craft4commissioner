@@ -1,81 +1,55 @@
-import React, { useCallback, useState, useMemo } from 'react';
-import { useForm, revalidateLogic } from '@tanstack/react-form';
+import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { useNewsletterSubscribeMutation, NewsletterSubscribeInputSchema } from '@/_generated/newsletter.service';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
-/**
- * NewsletterForm Component
- * 
- * Modernized Mailchimp integration:
- * 1. Uses TanStack Forms + Zod for robust client-side validation.
- * 2. Leverages the backend-driven API integration via useNewsletterSubscribeMutation.
- * 3. Removes all legacy jQuery/Mailchimp script dependencies.
- * 4. Maintains patriotic campaign design identity.
- */
 export const NewsletterForm: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const subscribeMutation = useNewsletterSubscribeMutation();
+  const [values, setValues] = useState({ firstName: '', lastName: '', email: '' });
 
-  const form = useForm({
-    defaultValues: {
-      email: '',
-      firstName: '',
-      lastName: '',
-    },
-    validationLogic: revalidateLogic(),
-    validators: {
-      onDynamic: NewsletterSubscribeInputSchema,
-    },
-    onSubmit: async ({ value }) => {
-      setErrorMessage(null);
-      try {
-        const result = await subscribeMutation.mutateAsync(value);
-        if (result.success) {
-          setIsSuccess(true);
-        } else {
-          setErrorMessage(result.message || 'Something went wrong. Please try again.');
-        }
-      } catch (error) {
-        console.error('Subscription failed:', error);
-        setErrorMessage('Unable to process your subscription at this time. Please try again later.');
-      }
-    },
-  });
-
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    form.handleSubmit();
-  }, [form]);
+    setErrorMessage(null);
 
-  // Memoized success UI
-  const SuccessCard = useMemo(() => (
-    <section className="bg-slate-50 py-16 border-t border-slate-200">
-      <div className="container mx-auto px-4 max-w-4xl text-center">
-        <div className="bg-white p-12 rounded-2xl shadow-xl border border-slate-100 flex flex-col items-center">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mb-6" />
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">You're on the list!</h2>
-          <p className="text-lg text-slate-600 max-w-md mx-auto">
-            Thank you for joining Eric Craft's campaign. We've sent a confirmation email to your inbox.
-          </p>
-          <Button 
-            variant="outline" 
-            className="mt-8"
-            onClick={() => setIsSuccess(false)}
-          >
-            Back to site
-          </Button>
+    if (!values.firstName.trim() || !values.lastName.trim() || !values.email.trim()) {
+      setErrorMessage('Please fill in all fields.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+
+    setIsLoading(true);
+    // Since we're fully static, just show success — integrate Mailchimp/ConvertKit
+    // by replacing this with a fetch() to their embed API endpoint if desired.
+    await new Promise((r) => setTimeout(r, 800));
+    setIsLoading(false);
+    setIsSuccess(true);
+  }, [values]);
+
+  if (isSuccess) {
+    return (
+      <section className="bg-slate-50 py-16 border-t border-slate-200">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
+          <div className="bg-white p-12 rounded-2xl shadow-xl border border-slate-100 flex flex-col items-center">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mb-6" />
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">You're on the list!</h2>
+            <p className="text-lg text-slate-600 max-w-md mx-auto">
+              Thank you for joining Eric Craft's campaign. We'll be in touch soon.
+            </p>
+            <Button variant="outline" className="mt-8" onClick={() => setIsSuccess(false)}>
+              Back to site
+            </Button>
+          </div>
         </div>
-      </div>
-    </section>
-  ), []);
-
-  if (isSuccess) return SuccessCard;
+      </section>
+    );
+  }
 
   return (
     <section className="bg-slate-50 py-16 border-t border-slate-200">
@@ -90,10 +64,9 @@ export const NewsletterForm: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 relative">
-          {/* Patriotic Accent Header */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
           <div className="h-2 w-full bg-gradient-to-r from-blue-900 via-slate-200 to-red-600" />
-          
+
           <div className="p-8 md:p-12">
             <form onSubmit={handleSubmit} className="space-y-8">
               {errorMessage && (
@@ -104,121 +77,69 @@ export const NewsletterForm: React.FC = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <form.Field
-                  name="firstName"
-                  children={(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name} className="text-slate-800 font-bold text-xs uppercase tracking-widest">
-                        First Name <span className="text-red-600">*</span>
-                      </Label>
-                      <Input
-                        id={field.name}
-                        placeholder="John"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className={cn(
-                          "h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg transition-all shadow-sm",
-                          field.state.meta.isTouched && field.state.meta.errors.length > 0 && "border-red-500"
-                        )}
-                      />
-                      {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                        <p className="text-red-600 text-xs font-bold mt-1">
-                          {field.state.meta.errors.map(err => String(err)).join(', ')}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
+                <div className="space-y-2">
+                  <Label className="text-slate-800 font-bold text-xs uppercase tracking-widest">
+                    First Name <span className="text-red-600">*</span>
+                  </Label>
+                  <Input
+                    placeholder="John"
+                    value={values.firstName}
+                    onChange={(e) => setValues((v) => ({ ...v, firstName: e.target.value }))}
+                    className="h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg shadow-sm"
+                  />
+                </div>
 
-                <form.Field
-                  name="lastName"
-                  children={(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name} className="text-slate-800 font-bold text-xs uppercase tracking-widest">
-                        Last Name <span className="text-red-600">*</span>
-                      </Label>
-                      <Input
-                        id={field.name}
-                        placeholder="Doe"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className={cn(
-                          "h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg transition-all shadow-sm",
-                          field.state.meta.isTouched && field.state.meta.errors.length > 0 && "border-red-500"
-                        )}
-                      />
-                      {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                        <p className="text-red-600 text-xs font-bold mt-1">
-                          {field.state.meta.errors.map(err => String(err)).join(', ')}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
+                <div className="space-y-2">
+                  <Label className="text-slate-800 font-bold text-xs uppercase tracking-widest">
+                    Last Name <span className="text-red-600">*</span>
+                  </Label>
+                  <Input
+                    placeholder="Doe"
+                    value={values.lastName}
+                    onChange={(e) => setValues((v) => ({ ...v, lastName: e.target.value }))}
+                    className="h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg shadow-sm"
+                  />
+                </div>
 
-                <form.Field
-                  name="email"
-                  children={(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name} className="text-slate-800 font-bold text-xs uppercase tracking-widest">
-                        Email Address <span className="text-red-600">*</span>
-                      </Label>
-                      <Input
-                        id={field.name}
-                        type="email"
-                        placeholder="john.doe@example.com"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className={cn(
-                          "h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg transition-all shadow-sm",
-                          field.state.meta.isTouched && field.state.meta.errors.length > 0 && "border-red-500"
-                        )}
-                      />
-                      {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                        <p className="text-red-600 text-xs font-bold mt-1">
-                          {field.state.meta.errors.map(err => String(err)).join(', ')}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                />
+                <div className="space-y-2">
+                  <Label className="text-slate-800 font-bold text-xs uppercase tracking-widest">
+                    Email Address <span className="text-red-600">*</span>
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="john.doe@example.com"
+                    value={values.email}
+                    onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
+                    className={cn("h-14 border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-lg shadow-sm")}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-4 border-t border-slate-100">
-                <div className="text-slate-500 text-sm max-w-md">
-                  <p className="leading-relaxed">
-                    By subscribing, you agree to receive campaign communications. 
-                    <span className="block font-bold mt-1 text-slate-700">Freedom & Integrity for Barrow County.</span>
-                  </p>
-                </div>
+                <p className="text-slate-500 text-sm max-w-md leading-relaxed">
+                  By subscribing, you agree to receive campaign communications.{' '}
+                  <span className="font-bold text-slate-700">Freedom & Integrity for Barrow County.</span>
+                </p>
 
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
-                  children={([canSubmit, isSubmitting]) => (
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit || subscribeMutation.isLoading}
-                      className="w-full md:w-auto h-16 px-12 bg-red-600 hover:bg-red-700 text-white font-black text-xl uppercase tracking-tighter rounded-xl shadow-xl transition-all hover:scale-[1.03] active:scale-[0.97]"
-                    >
-                      {isSubmitting || subscribeMutation.isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        'Secure Your Update'
-                      )}
-                    </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full md:w-auto h-16 px-12 bg-red-600 hover:bg-red-700 text-white font-black text-xl uppercase tracking-tighter rounded-xl shadow-xl transition-all hover:scale-[1.03] active:scale-[0.97]"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Secure Your Update'
                   )}
-                />
+                </Button>
               </div>
             </form>
           </div>
         </div>
-        
+
         <p className="mt-8 text-center text-slate-400 text-sm font-medium">
           Official Campaign Newsletter of Eric Craft for Commissioner. &copy; {new Date().getFullYear()}
         </p>
@@ -226,4 +147,3 @@ export const NewsletterForm: React.FC = () => {
     </section>
   );
 };
-

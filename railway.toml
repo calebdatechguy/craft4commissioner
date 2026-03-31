@@ -3,8 +3,8 @@ builder = "nixpacks"
 buildCommand = "bun install && bun run build-frontend"
 
 [deploy]
-startCommand = "bun run start:prod"
-healthcheckPath = "/health"
+startCommand = "bun run prod.ts"
+healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
